@@ -1,0 +1,49 @@
+version: "3.5"
+
+services:
+  postgres:
+    container_name: todo_postgres
+    image: postgres
+    ports:
+    - "5436:5432"
+    networks:
+      todo:
+        ipv4_address: "172.66.0.2"
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: "trust"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  web:
+    container_name: todo_web
+    build: .
+    ports:
+    - "8111:8111"
+    networks:
+      todo:
+        ipv4_address: "172.66.0.3"
+    depends_on:
+      - postgres
+    tty: true
+    command: bash -c "python manage.py makemigrations core --noinput &&
+              python manage.py makemigrations --noinput &&
+              python manage.py migrate --noinput &&
+              python manage.py collectstatic --noinput &&
+              python manage.py runserver 0.0.0.0:8111"
+    volumes:
+      - .:/code
+    logging:
+      driver: "json-file"
+      options:
+        max-size: 10m
+        max-file: "3"
+
+networks:
+  todo:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: "172.66.0.0/16"

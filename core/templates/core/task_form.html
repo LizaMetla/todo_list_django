@@ -2,7 +2,7 @@
 {% block content %}
 <h3>Task form</h3>
 <a href="{% url 'tasks' %}">Go back</a>
-<form method="Post" action="">
+<form method="post" action="{% url 'task-create' %}">
 
     {% csrf_token %}
     {{ form.as_p }}
